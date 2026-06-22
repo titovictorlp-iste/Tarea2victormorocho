@@ -98,6 +98,63 @@ public class Main {
             );
             AuditLogger.log("Archivo PKCS12 de servidor generado");
 
+            // ========================================================
+            // 4.1 CERTIFICADO PARA FIRMA DIGITAL
+            // ========================================================
+            KeyPair signKeys = CertificateGenerator.generateKeyPair();
+            AuditLogger.log("Par de claves para Firma Digital generado");
+            
+            X509Certificate signCert = CertificateGenerator.issueUserCertificate(
+                    "FirmaDigital_Identidad",
+                    signKeys.getPublic(),
+                    subKeys.getPrivate(),
+                    subCert
+            );
+            AuditLogger.log("Certificado de Firma Digital emitido");
+            
+            CertificateGenerator.saveCertificate("certificates/firma-digital.crt", signCert);
+            
+            P12Generator.createPKCS12(
+                    signKeys.getPrivate(),
+                    signCert,
+                    subCert,
+                    rootCert,
+                    "firma123".toCharArray(), 
+                    "firma123".toCharArray(),
+                    "certificates/firma-digital.p12",
+                    "FirmaDigital"
+            );
+            AuditLogger.log("Archivo PKCS12 de Firma Digital generado");
+
+            // ========================================================
+            // 4.2 CERTIFICADO PARA CORREO SEGURO (S/MIME)
+            // ========================================================
+            KeyPair emailKeys = CertificateGenerator.generateKeyPair();
+            AuditLogger.log("Par de claves para Correo Seguro generado");
+            
+            X509Certificate emailCert = CertificateGenerator.issueUserCertificate(
+                    "admin@entidad.gob.ec",
+                    emailKeys.getPublic(),
+                    subKeys.getPrivate(),
+                    subCert
+            );
+            AuditLogger.log("Certificado de Correo Seguro emitido");
+            
+            CertificateGenerator.saveCertificate("certificates/correo-seguro.crt", emailCert);
+            
+            P12Generator.createPKCS12(
+                    emailKeys.getPrivate(),
+                    emailCert,
+                    subCert,
+                    rootCert,
+                    "correo123".toCharArray(), 
+                    "correo123".toCharArray(),
+                    "certificates/correo-seguro.p12",
+                    "CorreoSeguro"
+            );
+            AuditLogger.log("Archivo PKCS12 de Correo Seguro generado");
+            // ========================================================
+            
             
             // 5. GENERACIÓN DE CRL (Lista de Revocación)
             AuditLogger.log("Iniciando proceso de revocación...");
